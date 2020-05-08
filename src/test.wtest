@@ -1,0 +1,87 @@
+import cultivos.*
+import hector.*
+import wollok.game.*
+
+describe "cultivos" {
+
+	var trigo
+	var tomaco
+	var maiz
+
+	fixture {
+		game.clear()
+		maiz = new Maiz()
+		trigo = new Trigo()
+		tomaco = new Tomaco()
+		game.addVisualCharacter(hector)
+		game.addVisual(aspersor)
+	}
+
+	test "no se pueden sembrar otro trigo en la misma posicion" {
+		hector.sembrar(trigo)
+		assert.throwsException({ hector.sembrar(new Trigo())})
+	}
+
+	test "regar un trigo en etapa 0, cambia la imagen a wheat_1.png" {
+		hector.sembrar(trigo)
+		hector.regar()
+		assert.equals("wheat_1.png", trigo.image())
+	}
+
+	test "regar un trigo en etapa 3, cambia la imagen a wheat_0.png" {
+		hector.sembrar(trigo)
+		hector.regar()
+		hector.regar()
+		hector.regar()
+		hector.regar()
+		assert.equals("wheat_0.png", trigo.image())
+	}
+
+	test "regar en un lugar donde no hay nada, tira errar" {
+		assert.throwsException({ hector.regar()})
+	}
+
+	test "regar un maiz bebe, lo pasa a etapa Adulto" {
+		hector.sembrar(maiz)
+		hector.regar()
+		assert.equals(maiz.etapa(), etapaAdulto)
+	}
+
+	test "cuando riego un tomaco, este se mueve una posicion para arriba" {
+		hector.sembrar(tomaco)
+		const y = tomaco.position().y()
+		hector.regar()
+		assert.equals(y + 1, tomaco.position().y())
+	}
+
+	test "cuando riego un tomaco que está en el borde, no sigue avanzando" {
+		hector.position(game.at(3, 9))
+		hector.sembrar(tomaco)
+		const y = tomaco.position().y()
+		hector.regar()
+		assert.equals(y, tomaco.position().y())
+	}
+
+	test "aspersor riega planta que está en la posicion de arriba" {
+		// ubico a hector en esta posicion para agregar ahi un cultivo
+		hector.position(game.at(4, 5))
+		hector.sembrar(trigo)
+		aspersor.regarCultivoAt(game.at(4, 5))
+		assert.equals("wheat_1.png", trigo.image())
+	}
+
+	test "aspersor riega dos plantas que hay a su alrededor" {
+		// ubico a hector arriba del aspersor y planto trigo
+		hector.position(game.at(4, 5))
+		hector.sembrar(trigo)
+		// ubico a hector abajo del aspersor y planto maiz
+		hector.position(game.at(3, 4))
+		hector.sembrar(maiz)
+		
+		aspersor.regar()
+		assert.equals("wheat_1.png", trigo.image())
+		assert.equals(maiz.etapa(), etapaAdulto)
+	}
+
+}
+

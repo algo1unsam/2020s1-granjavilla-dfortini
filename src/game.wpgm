@@ -3,16 +3,24 @@ import hector.*
 import cultivos.*
 
 program farmville {
-	//  CONFIG	
+	// CONFIG	
 	game.title("FarmVille")
 	game.height(10)
 	game.width(10)
 	game.ground("ground.png")
-
-	//  VISUALES
- 	game.addVisualCharacter(hector)
- 	game.addVisualIn(new Maiz(), game.at(1, 1))
- 	
- 	//  COMIENZA
+		
+	// VISUALES
+	game.addVisualCharacter(hector)
+	game.addVisualIn(new Maiz(), game.at(1, 1))
+	game.addVisual(aspersor)
+	game.onTick(5000, "regar", {aspersor.regar()})
+	
+	keyboard.m().onPressDo{ hector.sembrar(new Maiz()) }
+	keyboard.t().onPressDo{ hector.sembrar(new Trigo()) }
+	keyboard.o().onPressDo{ hector.sembrar(new Tomaco()) }
+	keyboard.r().onPressDo{ hector.regar() }
+	
 	game.start()
 }
+
+
